@@ -16,15 +16,13 @@ class SpiderMain(object):
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
         }
         r = requests.get(root_url, headers=headers)
-        soup = BeautifulSoup(r.content, 'html.parser')
+        soup = BeautifulSoup(r.content, 'html5lib')
         items = soup.select("#chapter-list-1 li a")
-        folder_path = './photo'
-        if os.path.exists(folder_path) is False:
-            os.makedirs(folder_path)
+        web_path = 'https://www.manhuafen.com/'
         for index, item in enumerate(items):
             if item:
               obj = {}
-              obj['url'] = item.get('href')
+              obj['url'] = web_path + item.get('href')
               obj['title'] = item.get_text()
               self.outputer.collect_data(obj)
         self.outputer.output_html()
