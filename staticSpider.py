@@ -1,11 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-from PIL import Image
-import os
-from io import BytesIO
-import time
 import html_outputer
 import db_option
+
 
 class SpiderMain(object):
     def __init__(self):
@@ -22,21 +19,16 @@ class SpiderMain(object):
         items = soup.select("#chapter-list-1 li a")
         for index, item in enumerate(items):
             if item:
-              obj = {}
-              obj['url'] = web_path + item.get('href')
-              obj['title'] = item.get_text().strip()
-              self.dboption.insertOne(obj, 'chapter')
-              self.outputer.output_img(obj['url'], obj['title'], index)
+                obj = {}
+                obj['url'] = web_path + item.get('href')
+                obj['title'] = item.get_text().strip()
+                self.dboption.insertOne(obj, 'chapter')
+                print('------------------执行了话的循环--------------')
+                self.outputer.output_img(obj['url'], obj['title'], index)
+
 
 if __name__ == "__main__":
     web_path = 'https://www.manhuafen.com/'
     root_url = "https://m.manhuafen.com/comic/39/"
     obj_spider = SpiderMain()
     obj_spider.craw(root_url, web_path)
-
-
-
-
-
-
-
