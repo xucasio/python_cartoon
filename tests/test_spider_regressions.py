@@ -1,4 +1,5 @@
 import importlib
+import logging
 import os
 import sys
 import tempfile
@@ -48,6 +49,14 @@ def import_html_outputer():
 
 class HtmlOutputerRetryTest(unittest.TestCase):
     """图片下载失败队列的回归测试。"""
+
+    def setUp(self):
+        """屏蔽预期异常路径产生的日志，保持测试输出聚焦断言结果。"""
+        logging.disable(logging.CRITICAL)
+
+    def tearDown(self):
+        """恢复全局日志状态，避免影响其他测试。"""
+        logging.disable(logging.NOTSET)
 
     def test_retry_uses_failure_dict_and_clears_successful_page(self):
         html_outputer = import_html_outputer()
