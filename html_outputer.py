@@ -67,7 +67,7 @@ class HtmlOutputer(object):
             raise RuntimeError('章节首页加载失败，无法获取总页数: %s' % mainUrl)
         try:
             pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
-            r = re.search('\((.*)/(.*)\)', pagestr)
+            r = re.search(r'\((.*)/(.*)\)', pagestr)
             surp = int(r.group(2))
         finally:
             browser.quit()
@@ -94,7 +94,7 @@ class HtmlOutputer(object):
         """从已打开的页面中提取图片并保存到本地。"""
         elem = browser.find_element_by_id("images").find_element_by_tag_name("img")
         pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
-        r = re.search('\((.*)/(.*)\)', pagestr)
+        r = re.search(r'\((.*)/(.*)\)', pagestr)
         curp = int(r.group(1))
         url = elem.get_attribute('src')
         html = requests.get(url)
