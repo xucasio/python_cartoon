@@ -67,7 +67,7 @@ class HtmlOutputer(object):
             pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
         finally:
             browser.quit()
-        r = re.search('\((.*)/(.*)\)', pagestr)
+        r = re.search(r'\((.*)/(.*)\)', pagestr)
         surp = int(r.group(2))
         
         # 按照20步长切割数组 
@@ -92,7 +92,7 @@ class HtmlOutputer(object):
         """保存当前浏览器页面中的漫画图片。"""
         elem = browser.find_element_by_id("images").find_element_by_tag_name("img")
         pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
-        r = re.search('\((.*)/(.*)\)', pagestr)
+        r = re.search(r'\((.*)/(.*)\)', pagestr)
         curp = int(r.group(1))
         url = elem.get_attribute('src')
         html = requests.get(url)
