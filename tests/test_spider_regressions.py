@@ -108,7 +108,9 @@ class SpiderRegressionTest(unittest.TestCase):
 
         outputer.save_img = raise_save
 
-        outputer.threadRun(0, './book', 'https://example/chapter', 1)
+        with mock.patch.object(html_outputer.logger, 'exception') as log_mock:
+            outputer.threadRun(0, './book', 'https://example/chapter', 1)
+        log_mock.assert_called_once()
 
         acquired = outputer.pool_sema.acquire(blocking=False)
         try:

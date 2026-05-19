@@ -69,7 +69,7 @@ class HtmlOutputer(object):
             raise RuntimeError('章节首页加载失败: %s?p=%s' % (mainUrl, counts))
         try:
             pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
-            r = re.search('\((.*)/(.*)\)', pagestr)
+            r = re.search(r'\((.*)/(.*)\)', pagestr)
             if r is None:
                 raise RuntimeError('无法解析章节总页数: %s' % pagestr)
             surp = int(r.group(2))
@@ -98,7 +98,7 @@ class HtmlOutputer(object):
         """保存当前浏览器页面中的漫画图片。"""
         elem = browser.find_element_by_id("images").find_element_by_tag_name("img")
         pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
-        r = re.search('\((.*)/(.*)\)', pagestr)
+        r = re.search(r'\((.*)/(.*)\)', pagestr)
         if r is None:
             raise RuntimeError('无法解析当前页码: %s' % pagestr)
         curp = int(r.group(1))
