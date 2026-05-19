@@ -5,11 +5,14 @@ import db_option
 import os
 
 class SpiderMain(object):
+    """漫画目录爬虫入口，负责解析章节并触发图片下载。"""
+
     def __init__(self):
         self.outputer = html_outputer.HtmlOutputer()
         self.dboption = db_option.dbOption()
 
     def craw(self, root_url, web_path, bookname):
+        """抓取漫画目录页，按章节保存元数据并下载图片。"""
         headers = {
             "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
@@ -17,7 +20,7 @@ class SpiderMain(object):
         if os.path.exists(bookname) is False:
             os.makedirs(bookname)
         retval = os.getcwd()
-        os.chdir(retval + '\\' + bookname)
+        os.chdir(os.path.join(retval, bookname))
         r = requests.get(root_url, headers=headers)
         soup = BeautifulSoup(r.content, 'html5lib')
         items = soup.select("#chapter-list-1 li a")
