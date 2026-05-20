@@ -11,7 +11,10 @@ import re
 from PIL import Image
 import time
 import os
+import logging
 from io import BytesIO
+
+logger = logging.getLogger(__name__)
 
 
 class HtmlOutputer(object):
@@ -57,9 +60,12 @@ class HtmlOutputer(object):
         if os.path.exists(folder_path) is False:
             os.makedirs(folder_path)
         browser = self.brower_data(mainUrl, counts, folder_path)
-        pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
-        r = re.search('\((.*)/(.*)\)', pagestr)
-        surp = int(r.group(2))
+        try:
+            pagestr = browser.find_element_by_id("images").find_element_by_class_name("img_info").text
+            r = re.search('\((.*)/(.*)\)', pagestr)
+            surp = int(r.group(2))
+        finally:
+            browser.quit()
         
         # 按照20步长切割数组 
         # 在线程控制上锁，限制5个，这步长基本作废了，哭
@@ -76,9 +82,13 @@ class HtmlOutputer(object):
                 threads[t].join()
             # 异常请求再次调用
             while len(self.exList) > 0:
-                for item in enumerate(list(self.exList)):
+                for item in list(self.exList):
+                    logger.warning('重试下载图片页: url=%s, page=%s', item['url'], item['index'])
                     browser = self.brower_data(item['url'], item['index'], item['folder'])
-                    self.save_img(browser, index, item['folder'], item['index'])
+                    try:
+                        self.save_img(browser, index, item['folder'], item['index'])
+                    finally:
+                        browser.quit()
         
         print(title, '完成',sep='/n------------------------------/n')
 
@@ -91,9 +101,9 @@ class HtmlOutputer(object):
         html = requests.get(url)
         img_name = str(index + 1) + '-' + str(curp) + '.png'
         image = Image.open(BytesIO(html.content))
-        for item in self.exList:
-            if item['url'] == url:
-                self.exList.remove({'index': counts, 'url': url, 'folder': folder_path})
+        for item in list(self.exList):
+            if item['index'] == counts and item['folder'] == folder_path:
+                self.exList.remove(item)
         image.save(folder_path + '/' + img_name)
         time.sleep(1)
 
@@ -107,16 +117,20 @@ class HtmlOutputer(object):
         try:
             browser.get(mainUrl + '?p=' + str(counts))
         except Exception as e:
-            print('当前进程异常啦', e)
+            logger.exception('当前进程异常啦: url=%s, page=%s', mainUrl, counts)
             self.exList.append({'index': counts, 'url': mainUrl, 'folder': folder})
         return browser
 
     def threadRun(self, index, folder_path, mainUrl, counts):
         self.pool_sema.acquire() # 加锁
-        browser = self.brower_data(mainUrl, counts, folder_path)
-        self.save_img(browser, index, folder_path, counts)
-        self.pool_sema.release() # 释放
-        browser.quit()
+        browser = None
+        try:
+            browser = self.brower_data(mainUrl, counts, folder_path)
+            self.save_img(browser, index, folder_path, counts)
+        finally:
+            self.pool_sema.release() # 释放
+            if browser is not None:
+                browser.quit()
 
     def list_split(self, items, n):
       return [items[i:i+n] for i in range(0, len(items), n)]

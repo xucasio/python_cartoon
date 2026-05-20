@@ -14,10 +14,11 @@ class SpiderMain(object):
             "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
         }
-        if os.path.exists(bookname) is False:
-            os.makedirs(bookname)
-        retval = os.getcwd()
-        os.chdir(retval + '\\' + bookname)
+        # 使用系统路径拼接，避免 Linux/macOS 下反斜杠目录导致 chdir 崩溃。
+        book_path = os.path.join(os.getcwd(), bookname)
+        if os.path.exists(book_path) is False:
+            os.makedirs(book_path)
+        os.chdir(book_path)
         r = requests.get(root_url, headers=headers)
         soup = BeautifulSoup(r.content, 'html5lib')
         items = soup.select("#chapter-list-1 li a")
