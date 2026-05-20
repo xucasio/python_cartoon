@@ -21,6 +21,12 @@ class SpiderMain(object):
     def __init__(self):
         self.exList = []  # 异常列表
 
+    def retry_exceptions(self):
+        """重试异常列表中的失败页面，保留原始页码和 URL。"""
+        while len(self.exList) > 0:
+            for item in list(self.exList):
+                self.craw(item['url'], item['index'])
+
     def craw(self, root_url, index):
         # 启动浏览器，获取网页源代码
         browser = webdriver.Chrome(chrome_options=chrome_options)
@@ -60,7 +66,5 @@ if __name__ == "__main__":
     for p in range(1, 5):
         threads['t' + str(p)].join()
     print('异常列表', obj_spider.exList)
-    while len(obj_spider.exList) > 0:
-        for item in enumerate(obj_spider.exList):
-            obj_spider.craw(root_url, item['index'])
+    obj_spider.retry_exceptions()
     print('完成捕捉')
